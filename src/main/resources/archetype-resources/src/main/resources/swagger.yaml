@@ -1,0 +1,255 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: User-BR
+  description: Expose all services to user accounts, create, read, update and
+    delete documents registered in User Repository
+basePath: /architecture/v1
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+tags:
+  - name: User
+paths:
+  /users:
+    get:
+      summary: List all users
+      tags:
+        - User
+      description: Returns all users from the system that the user has access to.
+      operationId: findUsers
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: User Response
+          schema:
+            $ref: '#/definitions/UserResponse'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      summary: Create a user
+      tags:
+        - User
+      description: Creates a new user.
+      operationId: addUser
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: body
+          description: User to be added
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '201':
+          description: User Created
+          schema:
+            $ref: '#/definitions/ResponseIdUser'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /users/{userId}:
+    get:
+      summary: Retrieve user
+      tags:
+        - User
+      description: Returns a user based on a single ID.
+      operationId: findUserById
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user to fetch
+          required: true
+          type: string
+      responses:
+        '200':
+          description: User Response
+          schema:
+            $ref: '#/definitions/UserResponse'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    put:
+      summary: Update user
+      tags:
+        - User
+      description: Update a user based on a single ID. This can only be done by the logged in user.
+      operationId: updateUser
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: userId
+          description: user id that need to be deleted
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Updated user object
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '200':
+          description: User Updated Successfully
+        '401':
+          description: Authorization Failed
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      summary: Delete user
+      tags:
+        - User
+      description: Delete a user based on a single ID. This can only be done by the logged in user.
+      operationId: deleteUser
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: userId
+          description: The user id that needs to be deleted
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Delete a user successfully
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+definitions:
+  User:
+    type: object
+    required:
+      - document
+    properties:
+      id:
+        type: string
+      fullName:
+        type: string
+      document:
+        $ref: '#/definitions/UserDocument'
+      birthDate:
+        type: string
+        format: date
+      email:
+        $ref: '#/definitions/UserEmail'
+      mobile:
+        $ref: '#/definitions/UserPhone'
+      gender:
+        type: string
+  UserResponse:
+    type: object
+    properties:
+      user:
+        type: array
+        items:
+          $ref: '#/definitions/User'
+  UserEmail:
+    type: object
+    required:
+      - email
+    properties:
+      email:
+        type: string
+  UserPhone:
+    type: object
+    required:
+      - regionCode
+      - areaCode
+      - phoneNumber
+    properties:
+      regionCode:
+        type: integer
+        format: int32
+      areaCode:
+        type: integer
+        format: int32
+      phoneNumber:
+        type: integer
+        format: int64
+  UserDocument:
+    type: object
+    required:
+      - documentId
+      - documentCountry
+    properties:
+      documentId:
+        type: string
+      documentCountry:
+        type: string
+  ResponseIdUser:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: string
+  ErrorModel:
+    type: array
+    items:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
